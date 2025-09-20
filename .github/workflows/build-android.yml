@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Latest)
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         
     - name: Setup Java 17
       uses: actions/setup-java@v4
@@ -27,46 +27,38 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Install Cordova
-      run: npm install -g cordova@12.0.0
-      
-    - name: Install dependencies
-      run: npm install
+    - name: Install Cordova latest
+      run: npm install -g cordova@latest
       
     - name: Accept Android licenses
       run: yes | sdkmanager --licenses
       
-    - name: Install required SDK components
+    - name: Install latest SDK components
       run: |
         sdkmanager "platform-tools"
-        sdkmanager "build-tools;34.0.0"
-        sdkmanager "platforms;android-34"
+        sdkmanager "build-tools;35.0.0"
+        sdkmanager "platforms;android-35"
         sdkmanager "cmdline-tools;latest"
       
-    - name: Remove existing Android platform
-      run: cordova platform remove android --save
-      continue-on-error: true
+    - name: Clean existing setup
+      run: |
+        rm -rf platforms/
+        rm -rf plugins/
+        rm -rf node_modules/
       
-    - name: Add latest Android platform
-      run: cordova platform add android@12.0.1 --save
+    - name: Install dependencies
+      run: npm install
       
-    - name: Verify platform
-      run: cordova platform list
+    - name: Add Android platform
+      run: cordova platform add android@14.0.1
       
-    - name: Build Android APK (Debug)
-      run: cordova build android --debug
-      
-    - name: Build Android APK (Release)
-      run: cordova build android --release
+    - name: Build APK with latest tools
+      run: |
+        cordova requirements android
+        cordova build android --release -- --gradleArg=--no-daemon --gradleArg=--warning-mode=all
         
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-debug-apk
-        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
-        
-    - name: Upload Release APK
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: android-release-apk
-        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        path: platforms/android/app/build/outputs/apk/release/*.apk

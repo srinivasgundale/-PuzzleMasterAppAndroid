@@ -8,9 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "ecosystem:cordova"
+    "ecosystem:cordova",
+    "puzzle",
+    "game"
   ],
-  "author": "Apache Cordova Team",
+  "author": "Srinivas",
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^14.0.1",

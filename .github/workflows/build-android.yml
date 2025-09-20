@@ -1,4 +1,4 @@
-name: Build Android APK (Latest)
+name: Build Android APK (Stable)
 
 on:
   push:
@@ -7,58 +7,49 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
     
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-version: '18'
         
-    - name: Setup Java 17
-      uses: actions/setup-java@v4
+    - name: Setup Java 11
+      uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '11'
         
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v2
       
-    - name: Install Cordova latest
-      run: npm install -g cordova@latest
+    - name: Install Cordova
+      run: npm install -g cordova@12.0.0
       
-    - name: Accept Android licenses
+    - name: Accept licenses
       run: yes | sdkmanager --licenses
       
-    - name: Install latest SDK components
+    - name: Install SDK components
       run: |
         sdkmanager "platform-tools"
-        sdkmanager "build-tools;35.0.0"
-        sdkmanager "platforms;android-35"
-        sdkmanager "cmdline-tools;latest"
+        sdkmanager "build-tools;33.0.2"
+        sdkmanager "platforms;android-33"
       
-    - name: Clean existing setup
+    - name: Clean and reinstall
       run: |
-        rm -rf platforms/
-        rm -rf plugins/
-        rm -rf node_modules/
+        rm -rf platforms/ plugins/ node_modules/
+        npm install
+        cordova platform add android@12.0.1
       
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Add Android platform
-      run: cordova platform add android@14.0.1
-      
-    - name: Build APK with latest tools
-      run: |
-        cordova requirements android
-        cordova build android --release -- --gradleArg=--no-daemon --gradleArg=--warning-mode=all
+    - name: Build APK
+      run: cordova build android --release
         
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: android-release-apk
-        path: platforms/android/app/build/outputs/apk/release/*.apk
+        name: puzzle-master-apk
+        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
